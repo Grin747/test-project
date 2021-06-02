@@ -1,15 +1,13 @@
 package com.example.testproject.controller;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.example.testproject.entity.User;
 import com.example.testproject.service.UserService;
 import com.example.testproject.storage.StorageFileNotFoundException;
-import com.example.testproject.storage.StorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,18 +22,15 @@ import javax.transaction.Transactional;
 @Controller
 public class ImageController {
 
-	private final StorageService storageService;
 	private final UserService userService;
 
 	@Autowired
-	public ImageController(StorageService storageService, UserService userService) {
-		this.storageService = storageService;
+	public ImageController(UserService userService) {
 		this.userService = userService;
 	}
 
 	@GetMapping("/")
 	public String index(Model model) {
-
 		return "index";
 	}
 

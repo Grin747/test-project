@@ -92,6 +92,10 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
+    public Picture getImage(UUID jackalId){
+        return picRepo.findByJackalJackalId(jackalId);
+    }
+
     private byte[] scale(byte[] fileData, int width, int height) {
         ByteArrayInputStream in = new ByteArrayInputStream(fileData);
         try {
