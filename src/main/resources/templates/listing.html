@@ -10,6 +10,8 @@
 </head>
 <body class="container my-3" style="background-color: #f5f5f5">
 
+<a href="/logout" class="w-100 btn btn-outline-danger btn-sm">Log out</a>
+
 <div class="row">
 
     <div class="col">
@@ -50,6 +52,10 @@
                 <h6 class="card-subtitle mb-2 text-muted" th:text="${entry.getDate()}"></h6>
                 <a th:href="'/img/' + ${entry.getJackalId()}" class="w-100 btn btn-outline-primary btn-sm">Full
                     picture</a>
+                <form method="post" action="/delete">
+                    <input name="delPicId" aria-label="delPicId" class="visually-hidden" th:value="${entry.getJackalId()}">
+                    <input  aria-label="delPicId" class="w-100 btn btn-sm btn-outline-danger" value="Delete" type="submit">
+                </form>
             </div>
         </div>
     </div>

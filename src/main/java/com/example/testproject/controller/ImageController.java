@@ -59,7 +59,7 @@ public class ImageController {
     }
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("imageName") String name,
+    public String handleImageUpload(@RequestParam("file") MultipartFile file, @RequestParam("imageName") String name,
                                    Authentication authentication) throws IOException {
 
         var user = (User) authentication.getPrincipal();
@@ -67,11 +67,19 @@ public class ImageController {
         return "redirect:/files";
     }
 
+    @PostMapping("/delete")
+    public String delete(@RequestParam("delPicId") UUID id, Authentication authentication){
+
+        var user = (User) authentication.getPrincipal();
+        userService.deletePicture(id);
+        return "redirect:/files";
+    }
+
     @GetMapping("/img/{imgId}")
     public String getImage(@PathVariable UUID imgId, Authentication authentication, Model model) {
 
         var user = (User) authentication.getPrincipal();
-        model.addAttribute("img", userService.getImage(imgId, user).getPicture());
+        model.addAttribute("img", userService.getImage(imgId).getPicture());
         return "fullsize";
     }
 }

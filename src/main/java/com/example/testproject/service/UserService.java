@@ -86,7 +86,7 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
-    public Picture getImage(UUID jackalId, User user){
+    public Picture getImage(UUID jackalId){
         return picRepo.findByJackalJackalId(jackalId);
     }
 
