@@ -12,6 +12,7 @@ public class Jackal {
     private String name;
     private final Date date;
     private long size;
+    @Column(columnDefinition = "TEXT")
     private String jackal;
     private String type;
     @ManyToOne

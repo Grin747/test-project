@@ -1,8 +1,12 @@
 package com.example.testproject.controller;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.example.testproject.entity.Jackal;
 import com.example.testproject.entity.User;
 import com.example.testproject.service.UserService;
 import com.example.testproject.storage.StorageFileNotFoundException;
@@ -22,44 +26,52 @@ import javax.transaction.Transactional;
 @Controller
 public class ImageController {
 
-	private final UserService userService;
+    private final UserService userService;
+    private final static Comparator[] comparators = {
+            Comparator.comparing(Jackal::getName),
+            Comparator.comparing(Jackal::getDate),
+            Comparator.comparing(Jackal::getSize)
+    };
 
-	@Autowired
-	public ImageController(UserService userService) {
-		this.userService = userService;
-	}
+    @Autowired
+    public ImageController(UserService userService) {
+        this.userService = userService;
+    }
 
-	@GetMapping("/")
-	public String index(Model model) {
-		return "index";
-	}
+    @GetMapping("/")
+    public String index(Model model) {
+        return "index";
+    }
 
-	@GetMapping("/files")
-	public String listUploadedFiles(Model model, Authentication authentication) {
+    @GetMapping("/files")
+    public String listUploadedFiles(Model model, Authentication authentication,
+                                    @RequestParam(name = "sortBy", defaultValue = "0") int sort) {
 
-		var user = (User) authentication.getPrincipal();
-		return "listing";
-	}
+        var user = (User) authentication.getPrincipal();
 
-	@PostMapping("/upload")
-	public String handleFileUpload(@RequestParam("file") MultipartFile file,
-			RedirectAttributes redirectAttributes, Authentication authentication) throws IOException {
+        var images = userService.getUserJackals(user.getId());
+        images.sort(comparators[sort]);
 
-		var user = (User) authentication.getPrincipal();
-		userService.addImage(user, file);
-		return "redirect:/files";
-	}
+        model.addAttribute("map", images);
+        model.addAttribute("sort", sort);
 
-	@GetMapping("/img/{imgId}")
-	public String getImage(@PathVariable UUID imgId, Authentication authentication){
+        return "listing";
+    }
 
-		var user = (User) authentication.getPrincipal();
-		return null;
-	}
+    @PostMapping("/upload")
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("imageName") String name,
+                                   Authentication authentication) throws IOException {
 
-	@ExceptionHandler(StorageFileNotFoundException.class)
-	public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-		return ResponseEntity.notFound().build();
-	}
+        var user = (User) authentication.getPrincipal();
+        userService.addImage(user, file, name);
+        return "redirect:/files";
+    }
 
+    @GetMapping("/img/{imgId}")
+    public String getImage(@PathVariable UUID imgId, Authentication authentication, Model model) {
+
+        var user = (User) authentication.getPrincipal();
+        model.addAttribute("img", userService.getImage(imgId, user).getPicture());
+        return "fullsize";
+    }
 }

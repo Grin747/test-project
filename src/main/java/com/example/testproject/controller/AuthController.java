@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 
@@ -44,6 +45,9 @@ public class AuthController {
             return "registration";
         }
 
-        return "redirect:/";
+        model.addAttribute("username", userForm.getUsername());
+        model.addAttribute("password", userForm.getPassword());
+
+        return "redirect:/login";
     }
 }

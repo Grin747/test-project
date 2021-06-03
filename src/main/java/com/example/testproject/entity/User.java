@@ -81,4 +81,8 @@ public class User implements UserDetails {
     public void setPasswordConfirm(String passwordConfirm) {
         this.passwordConfirm = passwordConfirm;
     }
+
+    public Set<Jackal> getJackals() {
+        return jackals;
+    }
 }

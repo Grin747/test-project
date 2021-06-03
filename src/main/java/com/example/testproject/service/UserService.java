@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Service
@@ -34,7 +35,7 @@ public class UserService implements UserDetailsService {
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private static final String[] allowedTypes = {"image/jpeg", "image/jpg"};
+    private static final String[] allowedTypes = {"image/jpeg", "image/jpg", "image/png"};
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -53,6 +54,42 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
+    public List<Jackal> getUserJackals(UUID userId){
+        return jackalRepo.findAllByUserId(userId);
+    }
+
+    public boolean addImage(User user, MultipartFile file, String name) throws IOException {
+
+        var type = file.getContentType();
+        if(!Arrays.asList(allowedTypes).contains(type)) return false;
+
+        var encoder = Base64.getMimeEncoder();
+        var jackalImg = scale(file.getBytes(), 200, 200);
+
+        var pic = new Picture();
+        pic.setPicture(encoder.encodeToString(file.getBytes()));
+        pic.setType(type);
+
+        var jackal = new Jackal();
+        jackal.setSize(file.getSize());
+        jackal.setName(name);
+        jackal.setUser(user);
+        jackal.setType(type);
+        jackal.setJackal(encoder.encodeToString(jackalImg));
+
+        pic.setJackal(jackal);
+        jackal.setPic(pic);
+
+        picRepo.save(pic);
+        jackalRepo.save(jackal);
+
+        return true;
+    }
+
+    public Picture getImage(UUID jackalId, User user){
+        return picRepo.findByJackalJackalId(jackalId);
+    }
+
     public boolean deleteUser(UUID userId) {
         if (userRepo.findById(userId).isPresent()) {
             userRepo.deleteById(userId);
@@ -61,39 +98,14 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    public Stream<Jackal> getUserJackals(UUID userId){
-        return jackalRepo.findAllByUserId(userId);
-    }
-
-    public boolean addImage(User user, MultipartFile file) throws IOException {
-
-        var type = file.getContentType();
-        if(!Arrays.asList(allowedTypes).contains(type)) return false;
-
-        var encoder = Base64.getMimeEncoder();
-        var jackalImg = scale(file.getBytes(), 100, 100);
-
-        var pic = new Picture();
-        pic.setPicture(encoder.encodeToString(file.getBytes()));
-        pic.setType(type);
-
-        var jackal = new Jackal();
-        jackal.setSize(file.getSize());
-        jackal.setName(file.getName());
-        jackal.setUser(user);
-        jackal.setJackal(encoder.encodeToString(jackalImg));
-
-        pic.setJackal(jackal);
-        jackal.setPic(pic);
-
-        jackalRepo.save(jackal);
-        picRepo.save(pic);
-
-        return true;
-    }
-
-    public Picture getImage(UUID jackalId){
-        return picRepo.findByJackalJackalId(jackalId);
+    public boolean deletePicture(UUID jackalId) {
+        var jackal = jackalRepo.findById(jackalId);
+        if (jackal.isPresent()) {
+            picRepo.delete(jackal.get().getPic());
+            jackalRepo.delete(jackal.get());
+            return true;
+        }
+        return false;
     }
 
     private byte[] scale(byte[] fileData, int width, int height) {

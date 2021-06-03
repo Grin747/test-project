@@ -8,9 +8,10 @@ import java.util.UUID;
 public class Picture {
     @Id
     private final UUID picId;
+    @Column(columnDefinition = "TEXT")
     private String picture;
     private String type;
-    @OneToOne
+    @OneToOne(mappedBy = "pic")
     private Jackal jackal;
 
     public Picture(){
